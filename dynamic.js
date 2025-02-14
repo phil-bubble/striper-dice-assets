@@ -1,7 +1,7 @@
-import DiceBox from "./dice-box.es.min.js";
+import DiceBox from "/striper-dice-assets/dice-box.es.min.js";
 
 // Base URL for all assets
-const BASE_URL = "./";
+const BASE_URL = "/striper-dice-assets/";
 
 // Test container for asset loading verification
 console.log('[Main] Testing asset loading...');
@@ -47,13 +47,13 @@ const config = {
   segments: 40,
   
   // Asset configuration
-  assetPath: "./assets/",
+  assetPath: "/striper-dice-assets/assets/",
   
   // Worker configuration with data URL
   worker: {
     enabled: true,
-    path: workerUrl,
-    wasmPath: "./assets/ammo/ammo.wasm.wasm"
+    path: "/striper-dice-assets/world.offscreen.fixed.js",
+    wasmPath: "/striper-dice-assets/assets/ammo/ammo.wasm.wasm"
   }
 };
 
