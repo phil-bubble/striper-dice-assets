@@ -25,14 +25,6 @@ testContainer.innerHTML = `
 `;
 document.body.appendChild(testContainer);
 
-// Create a data URL for the worker with the correct base URL
-const workerCode = `
-self.BASE_URL = "${BASE_URL}";
-importScripts("${BASE_URL}world.offscreen.fixed.js");
-`;
-const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
-const workerUrl = URL.createObjectURL(workerBlob);
-
 // Create configuration object
 const config = {
   container: "#dice-box",
@@ -46,12 +38,9 @@ const config = {
   angularDamping: 0.5,
   segments: 40,
   
-  // Asset configuration
+  // Use repository-relative paths
   assetPath: "/striper-dice-assets/assets/",
-  
-  // Worker configuration with data URL
   worker: {
-    enabled: true,
     path: "/striper-dice-assets/world.offscreen.fixed.js",
     wasmPath: "/striper-dice-assets/assets/ammo/ammo.wasm.wasm"
   }
@@ -60,7 +49,7 @@ const config = {
 // Initialize the dice box
 console.log('[Main] Creating DiceBox...');
 const diceBoxContainer = document.querySelector("#dice-box");
-const box = new DiceBox({
+let box = new DiceBox({
   ...config,
   width: diceBoxContainer.clientWidth,
   height: diceBoxContainer.clientHeight
@@ -71,14 +60,29 @@ console.log('[Main] Initializing DiceBox...');
 box.init().then(() => {
   console.log("[Main] DiceBox initialized successfully!");
   
-  // Add event listener for the roll button
-  document.getElementById('roll-button')?.addEventListener('click', () => {
-    const notation = document.getElementById('dice-notation')?.value || '2d6';
-    box.roll(notation);
+  // Add event listener for the roll button and input
+  const rollButton = document.getElementById('roll-button');
+  const diceNotationInput = document.getElementById('dice-notation');
+  const themeColorInput = document.getElementById('theme-color');
+
+  rollButton?.addEventListener('click', () => {
+    const notation = diceNotationInput?.value?.trim() || '2d6';
+    console.log('[Main] Rolling dice with notation:', notation);
+    box.roll([notation], {
+      themeColor: themeColorInput?.value
+    });
+  });
+
+  // Handle theme color changes
+  themeColorInput?.addEventListener('change', () => {
+    console.log('[Main] Updating theme color to:', themeColorInput.value);
+    box.updateConfig({
+      themeColor: themeColorInput.value
+    });
   });
   
   // Perform initial roll
-  box.roll('2d6');
+  box.roll(['2d6']);
 }).catch(error => {
   console.error('[Main] Error initializing DiceBox:', error);
 });
@@ -86,6 +90,7 @@ box.init().then(() => {
 // Handle theme changes
 document.getElementById("theme-selector")?.addEventListener("change", async () => {
   const selectedTheme = document.getElementById("theme-selector").value;
+  const themeColorInput = document.getElementById('theme-color');
   console.log("Changing to theme:", selectedTheme);
   
   try {
@@ -98,12 +103,15 @@ document.getElementById("theme-selector")?.addEventListener("change", async () =
     const newBox = new DiceBox({
       ...config,
       theme: selectedTheme,
+      meshName: selectedTheme === "rock" ? "smoothDice" : undefined,
+      themeColor: themeColorInput?.value,
       width: diceBox.clientWidth,
       height: diceBox.clientHeight
     });
 
     await newBox.init();
-    newBox.roll('2d6');
+    box = newBox; // Update the global box reference
+    box.roll(['2d6']); // Roll dice with new theme
   } catch (error) {
     console.error("Error changing theme:", error);
   }
@@ -120,5 +128,5 @@ window.addEventListener('resize', () => {
 
 // Clean up worker URL when page unloads
 window.addEventListener('unload', () => {
-  URL.revokeObjectURL(workerUrl);
+  // URL.revokeObjectURL(workerUrl);
 });
