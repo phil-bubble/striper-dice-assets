@@ -1,7 +1,7 @@
-import DiceBox from "/dice-box.es.min.js";
+import DiceBox from "./dice-box.es.min.js";
 
 // Base URL for all assets
-const BASE_URL = "/";
+const BASE_URL = "./";
 
 // Test container for asset loading verification
 console.log('[Main] Testing asset loading...');
@@ -47,13 +47,13 @@ const config = {
   segments: 40,
   
   // Asset configuration
-  assetPath: "/assets/",
+  assetPath: "./assets/",
   
   // Worker configuration with data URL
   worker: {
     enabled: true,
     path: workerUrl,
-    wasmPath: "/assets/ammo/ammo.wasm.wasm"
+    wasmPath: "./assets/ammo/ammo.wasm.wasm"
   }
 };
 
